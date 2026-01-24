@@ -7,7 +7,7 @@ ApplicationWindow {
     visible: true
     width: 600
     height: 500
-    title: "Hello App"
+    title: "Mocap File Cleaner"
     color: "#ffffff"
 
     TabBar {
@@ -25,11 +25,13 @@ ApplicationWindow {
         }
     }
 
+    //The layouts for th different tabs
     StackLayout {
         width: parent.width
         currentIndex: bar.currentIndex
         anchors.centerIn: parent
 
+        //Import tab 
         Button {
             id: importTab
             width: 200
