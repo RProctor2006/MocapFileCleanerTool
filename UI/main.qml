@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Controls.Basic
+import QtQuick.Controls
+import QtQuick.Window
 import QtQuick.Layouts
 
 ApplicationWindow {
@@ -29,11 +30,13 @@ ApplicationWindow {
         currentIndex: bar.currentIndex
         anchors.centerIn: parent
 
-        Rectangle {
+        Button {
             id: importTab
             width: 200
             height: 100
-            color: '#ff0000'
+            onClicked: {
+                ImportTab.ImportFile("CLICKED!")
+            }
         }
         Item {
             id: cleanupTab
