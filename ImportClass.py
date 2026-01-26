@@ -14,7 +14,7 @@ class ImportFileButton(QObject):
         super().__init__()
 
     #Assigning Slot to this allows it to be called from qml
-    @pyqtSlot(str)
+    @pyqtSlot()
     def ImportFile(self): #Opens the file explorer so that the user can select the animation file
         tk.Tk().withdraw()
 
@@ -22,8 +22,9 @@ class ImportFileButton(QObject):
         fn = askopenfilename(filetypes=[("FBX Files", ".fbx")])
         print("user chose ", fn)
 
+    @pyqtSlot()
     def GetFileName(self):
         if (fn != ""):
             return fn
         
-        print("No file chosen")
+        return ""

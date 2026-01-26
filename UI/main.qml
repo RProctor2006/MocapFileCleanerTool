@@ -37,7 +37,7 @@ ApplicationWindow {
             width: 200
             height: 100
             onClicked: {
-                ImportTab.ImportFile("CLICKED!")
+                ImportTab.ImportFile()
             }
 
             Text {
