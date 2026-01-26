@@ -7,6 +7,8 @@ from tkinter.filedialog import askopenfilename
 #Essential library for QObjects and Slot to pass through methods to qml
 from PyQt6.QtCore import QObject, pyqtSlot
 
+fn = ""
+
 class ImportFileButton(QObject):
     def __init__(self):
         super().__init__()
@@ -19,3 +21,9 @@ class ImportFileButton(QObject):
         #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
         fn = askopenfilename(filetypes=[("FBX Files", ".fbx")])
         print("user chose ", fn)
+
+    def GetFileName(self):
+        if (fn != ""):
+            return fn
+        
+        print("No file chosen")

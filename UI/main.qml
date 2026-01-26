@@ -25,7 +25,7 @@ ApplicationWindow {
         }
     }
 
-    //The layouts for th different tabs
+    //The layouts for the different tabs
     StackLayout {
         width: parent.width
         currentIndex: bar.currentIndex
@@ -38,6 +38,13 @@ ApplicationWindow {
             height: 100
             onClicked: {
                 ImportTab.ImportFile("CLICKED!")
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "Import File"
+                color: "#000000"
+                font: "24"
             }
         }
         Item {
