@@ -47,8 +47,20 @@ ApplicationWindow {
                 font: "24"
             }
         }
-        Item {
+        Button {
             id: cleanupTab
+            width: 200
+            height: 100
+            onClicked: {
+                CleanupFunctions.FindNodes()
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "Find Nodes"
+                color: "#000000"
+                font: "24"
+            }
         }
         Item {
             id: editTab

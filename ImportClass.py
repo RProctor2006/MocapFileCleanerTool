@@ -4,14 +4,23 @@ import os
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 
+from EventDispatcher import Dispatcher
+
+import shutil #High level file operations module
+
 #Essential library for QObjects and Slot to pass through methods to qml
 from PyQt6.QtCore import QObject, pyqtSlot
 
-fn = ""
-
 class ImportFileButton(QObject):
+    
     def __init__(self):
         super().__init__()
+        self.fn = ""
+        self.fileImported = False
+
+    def BackupFile(self):
+        if self.fn != "":
+            shutil.copy2(self.fn, "./FileBackup") #Calling shutils 'copy2'   is better than normal 'copy' as it attempts to preserve metadata
 
     #Assigning Slot to this allows it to be called from qml
     @pyqtSlot()
@@ -19,12 +28,14 @@ class ImportFileButton(QObject):
         tk.Tk().withdraw()
 
         #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
-        fn = askopenfilename(filetypes=[("FBX Files", ".fbx")])
-        print("user chose ", fn)
+        self.fn = askopenfilename(filetypes=[("FBX Files", ".fbx")])
+        print("user chose ", self.fn)
 
-    @pyqtSlot()
-    def GetFileName(self):
-        if (fn != ""):
-            return fn
-        
-        return ""
+        ImportFileButton.BackupFile(self)
+        Dispatcher.TriggerEvent()
+
+    def GetFilePath(self):
+        return self.fn
+    
+    def GetFileImported(self):
+        return self.fileImported
