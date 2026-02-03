@@ -81,11 +81,36 @@ class ToolMethods(QObject):
         root = self.Scene.GetRootNode()
         if root:
             self.FindNodesRecursive(root)
+    
+    #Temporary export function to test deletion methods
+    def ExportScene(self):
+        OutputPath = "./Exports/TestExport"
+
+        #If no scene
+        if not self.Scene:
+            print("No scene to export.")
+            return
+        
+        #Creates exporter object
+        exporter = fbx.FbxExporter.Create(self.Manager, "Exporter")
+
+        #If can't initialize exporter
+        if not exporter.Initialize(OutputPath, -1, self.Manager.GetIOSettings()):
+            print(f"Failed to initialize exporter for {OutputPath}")
+            exporter.Destroy()
+            return
+        
+        exporter.Export(self.Scene)
+        exporter.Destroy()
+
+        print(f"Scene exported to: {OutputPath}")
+
 
     #Recursively checks all of the root children for cameras and markers
     def FindNodesRecursive(self, node: fbx.FbxNode):
         print("recursive function called")
 
+        #Iterate through root scene and get all children & their attribute type
         for i in range(node.GetChildCount()):
             child = node.GetChild(i)
             attr = child.GetNodeAttribute()
@@ -105,3 +130,41 @@ class ToolMethods(QObject):
                         self.ULMarkers.append(child)
             self.FindNodesRecursive(child)
         self.PrintNodeCount()
+
+    @pyqtSlot()
+    def DeleteCameras(self):
+        
+        #Check if there are cameras to delete
+        if not self.Cameras:
+            print("No cameras to delete.")
+            return
+        
+        #Iterates through all found cameras
+        for cameraNode in self.Cameras:
+            parent = cameraNode.GetParent() #Gets the parent of the camera as it must be removed from the parent before being destroyed.
+
+            if parent:
+                parent.RemoveChild(cameraNode)
+                
+            cameraNode.Destroy()
+
+        self.Cameras.clear()
+
+    @pyqtSlot()
+    def DeleteULMarkers(self):
+
+        if not self.ULMarkers:
+            print("No un-labelled markers to delete.")
+            return
+        
+        for marker in self.ULMarkers:
+            parent = marker.GetParent()
+
+            if parent:
+                parent.RemoveChild(marker)
+
+            marker.Destroy()
+
+        self.ULMarkers.clear()
+        self.ExportScene()
+    
