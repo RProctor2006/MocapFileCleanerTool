@@ -100,9 +100,7 @@ class ToolMethods(QObject):
                 #Markers
                 if attrType == fbx.FbxNodeAttribute.EType.eMarker:
                     name = child.GetName()
-                    if not name or (
-                        self.ULMarkPrefix and name.startswith(self.ULMarkPrefix)
-                    ):
+                    if not self.ULMarkPrefix or child.GetName().startswith(self.ULMarkPrefix):
                         self.ULMarkers.append(child)
             self.FindNodesRecursive(child)
         self.PrintNodeCount()
