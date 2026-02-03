@@ -52,8 +52,9 @@ ApplicationWindow {
 
             Column {
                 width: 200
-                height: 100
+                height: 300
                 spacing: 20
+                anchors.centerIn: parent
 
                 Button {
                     width: 200
