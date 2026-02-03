@@ -13,9 +13,14 @@ import fbx
 
 class ToolMethods(QObject):
 
-    #Store prefixes and file path
+    #Store prefixes
     CamPrefix = ""
     ULMarkPrefix = ""
+    
+    #Lists that will be filled with the found markers and cameras
+    Cameras: list[fbx.FbxNode] = []
+    ULMarkers: list[fbx.FbxNode] = []
+
     FilePath = ""
 
     #FBX SDK Objects
@@ -25,10 +30,9 @@ class ToolMethods(QObject):
     #Get Root Node (The parent of all the scene elements)
     Root = Scene.GetRootNode()
 
-    #Lists that will be filled with the found markers and cameras
-    Cameras: list[fbx.FbxNode] = []
-    ULMarkers: list[fbx.FbxNode] = []
     
+    #Import functions
+    #Constructor
     def __init__(self):
         super().__init__()
         self.FilePath = ""
@@ -47,14 +51,10 @@ class ToolMethods(QObject):
         print("user chose ", self.FilePath)
 
         ToolMethods.BackupFile(self)
-
-    def GetFilePath(self):
-        return self.FilePath
-    
-    def GetFileImported(self):
-        return self.fileImported
         
 
+    #Cleanup functions
+    #Imports the scene to access the elements
     def ImportSceneFbx(self):
         Importer = fbx.FbxImporter.Create(self.Manager, "Importer")
 
@@ -68,8 +68,12 @@ class ToolMethods(QObject):
         Importer.Import(self.Scene)
         Importer.Destroy()
 
+    def PrintNodeCount(self):
+        print(f"Cameras found: {len(self.Cameras)}")
+        print(f"Unlabelled Markers found: {len(self.ULMarkers)}")
 
-    #Recursively checks the scene for cameras and markers
+    #Pre function of recursive node finder function
+    #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
     @pyqtSlot()
     def FindNodes(self):
         print(self.FilePath)
@@ -78,10 +82,7 @@ class ToolMethods(QObject):
         if root:
             self.FindNodesRecursive(root)
 
-    def PrintNodeCount(self):
-        print(f"Cameras found: {len(self.Cameras)}")
-        print(f"Unlabelled Markers found: {len(self.ULMarkers)}")
-
+    #Recursively checks all of the root children for cameras and markers
     def FindNodesRecursive(self, node: fbx.FbxNode):
         print("recursive function called")
 
