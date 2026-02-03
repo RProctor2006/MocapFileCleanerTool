@@ -1,38 +1,58 @@
 import sys
 import os
 
+import tkinter as tk
+from tkinter.filedialog import askopenfilename
+
+import shutil #High level file operations module
+
+#Essential library for QObjects and Slot to pass through methods to qml
 from PyQt6.QtCore import QObject, pyqtSlot
-from ImportClass import ImportFileButton #Need the import class to access the get file path function
-import fbx #Imports the fbx sdk
 
+import fbx
 
-class CleanupFunctions(QObject):
+class ToolMethods(QObject):
 
-    def __init__(self, filePath: str, CamPrefix = "", ULMarkPrefix = ""):        #Constructor w/ prefix variables
+    #Store prefixes and file path
+    CamPrefix = ""
+    ULMarkPrefix = ""
+    FilePath = ""
+
+    #FBX SDK Objects
+    Manager = fbx.FbxManager.Create()
+    Scene = fbx.FbxScene.Create(Manager, "Scene")
+
+    #Get Root Node (The parent of all the scene elements)
+    Root = Scene.GetRootNode()
+
+    #Lists that will be filled with the found markers and cameras
+    Cameras: list[fbx.FbxNode] = []
+    ULMarkers: list[fbx.FbxNode] = []
+    
+    def __init__(self):
         super().__init__()
+        self.FilePath = ""
 
-        print(filePath)
+    def BackupFile(self):
+        if self.FilePath != "":
+            shutil.copy2(self.FilePath, "./FileBackup") #Calling shutils 'copy2'   is better than normal 'copy' as it attempts to preserve metadata
 
-        #Store prefixes and file path
-        self.CamPrefix = CamPrefix
-        self.ULMarkPrefix = ULMarkPrefix
-        self.FilePath = filePath
+    #Assigning Slot to this allows it to be called from qml
+    @pyqtSlot()
+    def ImportFile(self): #Opens the file explorer so that the user can select the animation file
+        tk.Tk().withdraw()
 
-        #FBX SDK Objects
-        self.Manager = fbx.FbxManager.Create()
-        self.Scene = fbx.FbxScene.Create(self.Manager, "Scene")
+        #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
+        self.FilePath = askopenfilename(filetypes=[("FBX Files", ".fbx")])
+        print("user chose ", self.FilePath)
 
-        #Get Root Node (The parent of all the scene elements)
-        Root = self.Scene.GetRootNode()
-        
-        if not Root:
-            print("No root node found in scene.")
-            self.Manager.Destroy()
-            return
-        
-        #Lists that will be filled with the found markers and cameras
-        self.Cameras: list[fbx.FbxNode] = []
-        self.ULMarkers: list[fbx.FbxNode] = []
+        ToolMethods.BackupFile(self)
+
+    def GetFilePath(self):
+        return self.FilePath
+    
+    def GetFileImported(self):
+        return self.fileImported
         
 
     def ImportSceneFbx(self):
@@ -58,9 +78,12 @@ class CleanupFunctions(QObject):
         if root:
             self.FindNodesRecursive(root)
 
+    def PrintNodeCount(self):
+        print(f"Cameras found: {len(self.Cameras)}")
+        print(f"Unlabelled Markers found: {len(self.ULMarkers)}")
+
     def FindNodesRecursive(self, node: fbx.FbxNode):
         print("recursive function called")
-        print(f"Root Node Child Count: {node.GetChildCount()}")
 
         for i in range(node.GetChildCount()):
             child = node.GetChild(i)
@@ -82,5 +105,4 @@ class CleanupFunctions(QObject):
                     ):
                         self.ULMarkers.append(child)
             self.FindNodesRecursive(child)
-            print(f"Number of Cameras: {len(self.Cameras.count())}         Number of Unlabelled Markers: {len(self.ULMarkers.count())}")
-
+        self.PrintNodeCount()

@@ -37,7 +37,7 @@ ApplicationWindow {
             width: 200
             height: 100
             onClicked: {
-                ImportTab.ImportFile()
+                Tools.ImportFile()
             }
 
             Text {
@@ -52,7 +52,7 @@ ApplicationWindow {
             width: 200
             height: 100
             onClicked: {
-                CleanupFunctions.FindNodes()
+                Tools.FindNodes()
             }
 
             Text {
