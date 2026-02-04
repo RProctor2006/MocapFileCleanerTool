@@ -68,20 +68,13 @@ class ToolMethods(QObject):
         Importer.Import(self.Scene)
         Importer.Destroy()
 
+
+    #Debug function to show how many nodes have been found
     def PrintNodeCount(self):
         print(f"Cameras found: {len(self.Cameras)}")
         print(f"Unlabelled Markers found: {len(self.ULMarkers)}")
 
-    #Pre function of recursive node finder function
-    #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
-    @pyqtSlot()
-    def FindNodes(self):
-        print(self.FilePath)
-        self.ImportSceneFbx()
-        root = self.Scene.GetRootNode()
-        if root:
-            self.FindNodesRecursive(root)
-    
+
     #Temporary export function to test deletion methods
     def ExportScene(self):
         OutputPath = "./Exports/TestExport"
@@ -104,7 +97,17 @@ class ToolMethods(QObject):
         exporter.Destroy()
 
         print(f"Scene exported to: {OutputPath}")
+        
 
+    #Pre function of recursive node finder function
+    #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
+    @pyqtSlot()
+    def FindNodes(self):
+        print(self.FilePath)
+        self.ImportSceneFbx()
+        root = self.Scene.GetRootNode()
+        if root:
+            self.FindNodesRecursive(root)
 
     #Recursively checks all of the root children for cameras and markers
     def FindNodesRecursive(self, node: fbx.FbxNode):
