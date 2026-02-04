@@ -105,6 +105,58 @@ ApplicationWindow {
         }
         Item {
             id: editTab
+
+            Column {
+                width: 200
+                height: 300
+                spacing: 20
+                anchors.centerIn: parent
+
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.EnsureRootBone()
+                    }
+
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Add Root Bone"
+                    color: "#000000"
+                    font: "24"
+                    }
+                }
+            
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.DeleteCameras()
+                    }
+
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Rename Skeleton"
+                    color: "#000000"
+                    font: "24"
+                    }
+                }
+
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.DeleteCameras()
+                    }
+
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Label Markers"
+                    color: "#000000"
+                    font: "24"
+                    }
+                }
+            }
         }
     }
 }

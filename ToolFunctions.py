@@ -171,3 +171,70 @@ class ToolMethods(QObject):
         self.ULMarkers.clear()
         self.ExportScene()
     
+    #Edit Functions
+    #Gets the skeletal bones
+    def FindSkeletonRoot(self, node: fbx.FbxNode) -> list[fbx.FbxNode]:
+        attr = node.GetNodeAttribute()
+
+        if attr and attr.GetAttributeType() == fbx.FbxNodeAttribute.EType.eSkeleton:
+            return node
+        
+        for i in range(node.GetChildCount()):
+            found = self.FindSkeletonRoot(node.GetChild(i))
+            if found:
+                return found
+        
+        return None
+    
+
+    #Checks if there is a root bone
+    def HasRootBone(skeletonNodes: list[fbx.FbxNode]) -> bool:
+        for node in skeletonNodes:
+            if node.GetName().lower() == "root":
+                return True
+            
+            return False
+        
+    #Creates the root bone and reparents the skeleton to the root bone
+    def CreateRootBone(self, skeleton: list[fbx.FbxNode]) -> fbx.FbxNode:
+        
+        scene = self.Scene
+
+        #Create skeleton attribute
+        rootSkel = fbx.FbxSkeleton.Create(scene, "root")
+        rootSkel.SetSkeletonType(fbx.FbxSkeleton.EType.eRoot)
+
+        #Create node
+        rootNode = fbx.FbxNode.Create(scene, "root")
+        rootNode.SetNodeAttribute(rootSkel)
+
+        #Zero Transforms
+        rootNode.LclTranslation.Set(fbx.FbxDouble3(0, 0, 0))
+        rootNode.LclRotation.Set(fbx.FbxDouble3(0, 0, 0))
+        rootNode.LclScaling.Set(fbx.FbxDouble3(1, 1, 1))
+
+        sceneRoot = scene.GetRootNode()
+        sceneRoot.AddChild(rootNode)
+
+        #Reparent Skeleton
+        for skel in skeleton:
+            sceneRoot.RemoveChild(skel)
+            rootNode.AddChild(skel)
+        
+        return rootNode
+    
+    @pyqtSlot()
+    def EnsureRootBone(self):
+        sceneRoot = self.Scene.GetRootNode()
+        skeletonBones = self.FindSkeleton(sceneRoot)
+
+        if not skeletonBones:
+            print("No skeleton found in scene.")
+            return
+        
+        if self.HasRootBone(skeletonBones):
+            print ("Root bone already exists.")
+            return
+        
+        print("No root bone found. Creating root bone.")
+        self.CreateRootBone(skeletonBones)
