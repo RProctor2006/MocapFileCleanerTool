@@ -238,7 +238,7 @@ class ToolMethods(QObject):
     #Creates the root bone and reparents the skeleton to the root bone
     def CreateRootBone(self, pelvisNode: fbx.FbxNode) -> fbx.FbxNode:
         scene = self.Scene
-        sceneRoot = scene.GetRootNode()
+        pelvisParent = pelvisNode.GetParent()
 
         pelvisGlobal = pelvisNode.EvaluateGlobalTransform()
 
@@ -260,8 +260,8 @@ class ToolMethods(QObject):
         rootNode.LclScaling.Set(fbx.FbxDouble3(s[0], s[1], s[2]))
 
         # Insert root above pelvis
-        sceneRoot.AddChild(rootNode)
-        sceneRoot.RemoveChild(pelvisNode)
+        pelvisParent.AddChild(rootNode)
+        pelvisParent.RemoveChild(pelvisNode)
         rootNode.AddChild(pelvisNode)
 
         return rootNode
@@ -311,6 +311,6 @@ class ToolMethods(QObject):
         print(f"Pelvis bone detected as '{pelvisNode.GetName()}'")
 
         print ("Creating root bone")
-        rootNode = self.CreateRootBone(pelvisNode)
+        self.CreateRootBone(pelvisNode)
         
         self.UpdateBindPose()
