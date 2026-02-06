@@ -32,21 +32,48 @@ ApplicationWindow {
         anchors.centerIn: parent
 
         //Import tab 
-        Button {
+        Item {
             id: importTab
-            width: 200
-            height: 100
-            onClicked: {
-                Tools.ImportFile()
-            }
+            
 
-            Text {
+            Column {
+                width: 200
+                height: 200
+                spacing: 20
                 anchors.centerIn: parent
-                text: "Import File"
-                color: "#000000"
-                font: "24"
+
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.ImportFile()
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Import File"
+                        color: "#000000"
+                        font: "24"
+                    }
+                }
+            
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.ExportScene()
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Export File"
+                        color: "#000000"
+                        font: "24"
+                    }
+                }
             }
         }
+        
         Item {
             id: cleanupTab
 
@@ -108,7 +135,7 @@ ApplicationWindow {
 
             Column {
                 width: 200
-                height: 300
+                height: 200
                 spacing: 20
                 anchors.centerIn: parent
 
@@ -137,21 +164,6 @@ ApplicationWindow {
                     Text {
                     anchors.centerIn: parent
                     text: "Rename Skeleton"
-                    color: "#000000"
-                    font: "24"
-                    }
-                }
-
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.DeleteCameras()
-                    }
-
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Label Markers"
                     color: "#000000"
                     font: "24"
                     }

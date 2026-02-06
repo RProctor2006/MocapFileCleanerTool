@@ -80,6 +80,7 @@ class ToolMethods(QObject):
 
 
     #Temporary export function to test deletion methods
+    @pyqtSlot()
     def ExportScene(self):
         OutputPath = "./Exports/TestExport"
 
@@ -107,14 +108,13 @@ class ToolMethods(QObject):
     #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
     @pyqtSlot()
     def FindNodes(self):
-        print(self.FilePath)
         root = self.Scene.GetRootNode()
         if root:
             self.FindNodesRecursive(root)
+            self.PrintNodeCount()
 
     #Recursively checks all of the root children for cameras and markers
     def FindNodesRecursive(self, node: fbx.FbxNode):
-        print("recursive function called")
 
         #Iterate through root scene and get all children & their attribute type
         for i in range(node.GetChildCount()):
@@ -135,7 +135,7 @@ class ToolMethods(QObject):
                     if not self.ULMarkPrefix or child.GetName().startswith(self.ULMarkPrefix):
                         self.ULMarkers.append(child)
             self.FindNodesRecursive(child)
-        self.PrintNodeCount()
+
 
     @pyqtSlot()
     def DeleteCameras(self):
@@ -154,6 +154,7 @@ class ToolMethods(QObject):
                 
             cameraNode.Destroy()
 
+        print("Cameras deleted.")
         self.Cameras.clear()
 
     @pyqtSlot()
@@ -171,8 +172,8 @@ class ToolMethods(QObject):
 
             marker.Destroy()
 
+        print("Un-labelled markers deleted.")
         self.ULMarkers.clear()
-        self.ExportScene()
     
 
 
@@ -180,7 +181,6 @@ class ToolMethods(QObject):
     #Finds top level skeleton nodes but doesn't stop when finding one
     def FindSkeletonRoots(self, node: fbx.FbxNode, roots: list[fbx.FbxNode]):
         attr = node.GetNodeAttribute()
-        print(node.GetChildCount())
 
         if attr and attr.GetAttributeType() == fbx.FbxNodeAttribute.EType.eSkeleton:
             parent = node.GetParent()
@@ -220,7 +220,6 @@ class ToolMethods(QObject):
 
         for root in roots:
             count = self.CountSkeletonBones(root)
-            print(f"Skeleton '{root.GetName()}' has {count} bones")
 
             if count > bestCount:
                 bestCount = count
@@ -406,7 +405,6 @@ class ToolMethods(QObject):
         # remove non-alphanumeric
         name = "".join(c for c in name if c.isalnum())
 
-        print(name)
         return name
     
     def Similarity(self, a, b) -> float:
