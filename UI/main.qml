@@ -34,6 +34,7 @@ ApplicationWindow {
         //Import tab 
         Item {
             id: importTab
+            
 
             Column {
                 width: 200
@@ -76,115 +77,59 @@ ApplicationWindow {
         Item {
             id: cleanupTab
 
-            Row {
-                width: 400
+            Column {
+                width: 200
                 height: 300
                 spacing: 20
                 anchors.centerIn: parent
 
-                Column {
-                width: 200
-                height: 300
-                spacing: 20
-
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.FindNodes()
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Find Nodes"
-                            color: "#000000"
-                            font: "24"
-                        }
-                    }
-            
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.DeleteCameras()
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Delete Cameras."
-                            color: "#000000"
-                            font: "24"
-                        }
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.FindNodes()
                     }
 
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.DeleteULMarkers()
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Delete Un-labelled Markers."
-                            color: "#000000"
-                            font: "24"
-                        }
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Find Nodes"
+                    color: "#000000"
+                    font: "24"
                     }
                 }
-                Column {
-                width: 200
-                height: 300
-                spacing: 20
-
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.FindNodes()
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Find Nodes"
-                            color: "#000000"
-                            font: "24"
-                        }
-                    }
             
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.DeleteCameras()
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Delete Cameras."
-                            color: "#000000"
-                            font: "24"
-                        }
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.DeleteCameras()
                     }
 
-                    Button {
-                        width: 200
-                        height: 100
-                        onClicked: {
-                            Tools.DeleteULMarkers()
-                        }
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Delete Cameras."
+                    color: "#000000"
+                    font: "24"
+                    }
+                }
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Delete Un-labelled Markers."
-                            color: "#000000"
-                            font: "24"
-                        }
+                Button {
+                    width: 200
+                    height: 100
+                    onClicked: {
+                        Tools.DeleteULMarkers()
+                    }
+
+                    Text {
+                    anchors.centerIn: parent
+                    text: "Delete Un-labelled Markers."
+                    color: "#000000"
+                    font: "24"
                     }
                 }
             }
+            
         }
-
         Item {
             id: editTab
 
@@ -218,7 +163,7 @@ ApplicationWindow {
 
                     Text {
                     anchors.centerIn: parent
-                    text: "Rename Skeleton to\nDefault UE Skeleton\nWarning! Accurate for %90\nof bones. Manual Inspection\nrecommended."
+                    text: "Rename Skeleton"
                     color: "#000000"
                     font: "24"
                     }
