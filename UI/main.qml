@@ -131,7 +131,7 @@ ApplicationWindow {
                     width: 200
                     height: 100
                     onClicked: {
-                        Tools.DeleteCameras()
+                        Tools.RenameSkeleton()
                     }
 
                     Text {

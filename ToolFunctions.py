@@ -1,8 +1,12 @@
 import sys
 import os
 
+#File dialog
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+
+from difflib import SequenceMatcher
+import re
 
 import shutil #High level file operations module
 
@@ -272,6 +276,7 @@ class ToolMethods(QObject):
         scene = self.Scene
         poseCount = scene.GetPoseCount()
 
+        #Find the current bound pose and remove it
         for i in range(poseCount):
             pose = scene.GetPose(i)
 
@@ -279,9 +284,12 @@ class ToolMethods(QObject):
                 scene.RemovePose(i)
                 break
 
+        #Create a new pose and bind it
         bindPose = fbx.FbxPose.Create(scene, "BindPose")
         bindPose.SetIsBindPose(True)
 
+
+        #Add the bind pose to the scene
         def AddToPose(node: fbx.FbxNode):
             globalAMatrix = node.EvaluateGlobalTransform()
             globalMatrix = fbx.FbxMatrix(globalAMatrix)
@@ -294,6 +302,7 @@ class ToolMethods(QObject):
         AddToPose(scene.GetRootNode())
         scene.AddPose(bindPose)
     
+
     @pyqtSlot()
     def EnsureRootBone(self):
         skelRoot = self.FindCharacterSkeleton()
@@ -314,3 +323,137 @@ class ToolMethods(QObject):
         self.CreateRootBone(pelvisNode)
         
         self.UpdateBindPose()
+
+    def NormalizeName(self, name: str) -> str:
+        name = name.lower()
+
+        replacements = {
+            "hip" : "pelvis",
+            "spine": "spine_01",
+            "spine1": "spine_02",
+            "spine2": "spine_03",
+            "spine3": "spine_04",
+            "neck": "neck_01",
+            "neck1": "neck_02",
+            "head": "head",
+            "leftshoulder": "clavicle_l",
+            "leftarm": "upperarm_l",
+            "leftforearm": "lowerarm_l",
+            "lefthand": "hand_l",
+            "lefthandmiddle1": "middle_metacarpal_l",
+            "lefthandmiddle2": "middle_01_l",
+            "lefthandmiddle3": "middle_02_l",
+            "lefthandmiddle4": "middle_03_l",
+            "lefthandindex": "index_metacarpal_l",
+            "lefthandindex1": "index_01_l",
+            "lefthandindex2": "index_02_l",
+            "lefthandindex3": "index_03_l",
+            "lefthandindex4": "index_04_l",
+            "lefthandring": "ring_metacarpal_l",
+            "lefthandring1": "ring_01_l",
+            "lefthandring2": "ring_02_l",
+            "lefthandring3": "ring_03_l",
+            "lefthandring4": "ring_04_l",
+            "lefthandpinky": "pinky_metacarpal_l",
+            "lefthandpinky1": "pinky_01_l",
+            "lefthandpinky2": "pinky_02_l",
+            "lefthandpinky3": "pinky_03_l",
+            "lefthandpinky4": "pinky_04_l",
+            "leftthumb1": "thumb_01_l",
+            "leftthumb2": "thumb_02_l",
+            "leftthumb3": "thumb_03_l",
+            "leftthumb4": "thumb_04_l",
+            "rightshoulder": "clavicle_r",
+            "rightarm": "upperarm_r",
+            "rightforearm": "lowerarm_r",
+            "righthand": "hand_r",
+            "righthandmiddle1": "middle_metacarpal_r",
+            "righthandmiddle2": "middle_01_r",
+            "righthandmiddle3": "middle_02_r",
+            "righthandmiddle4": "middle_03_r",
+            "righthandindex": "index_metacarpal_r",
+            "righthandindex1": "index_01_r",
+            "righthandindex2": "index_02_r",
+            "righthandindex3": "index_03_r",
+            "righthandindex4": "index_04_r",
+            "righthandring": "ring_metacarpal_r",
+            "righthandring1": "ring_01_r",
+            "righthandring2": "ring_02_r",
+            "righthandring3": "ring_03_r",
+            "righthandring4": "ring_04_r",
+            "righthandpinky": "pinky_metacarpal_r",
+            "righthandpinky1": "pinky_01_r",
+            "righthandpinky2": "pinky_02_r",
+            "righthandpinky3": "pinky_03_r",
+            "righthandpinky4": "pinky_04_r",
+            "rightthumb1": "thumb_01_r",
+            "rightthumb2": "thumb_02_r",
+            "rightthumb3": "thumb_03_r",
+            "rightthumb4": "thumb_04_r",
+            "rightupleg": "thigh_r",
+            "rightleg": "calf_r",
+            "rightfoot": "foot_r",
+            "righttoebase": "ball_r",
+            "leftupleg": "thigh_l",
+            "leftleg": "calf_l",
+            "leftfoot": "foot_l",
+            "lefttoebase": "ball_l",
+        }
+
+        for key, value in replacements.items():
+            name = re.sub(key, value, name)
+
+        # remove non-alphanumeric
+        name = "".join(c for c in name if c.isalnum())
+
+        print(name)
+        return name
+    
+    def Similarity(self, a, b) -> float:
+        return SequenceMatcher(None, a, b).ratio()
+    
+    @pyqtSlot()
+    def RenameSkeleton(self):
+        ueBones = {"root", "pelvis", "spine_01", "spine_02", "spine_03", "spine_04", "spine_05", "clavicle_l", "upperarm_l", "lowerarm_l",
+                    "hand_l", "index_metacarpal_l", "index_01_l", "index_02_l", "index_03_l", "middle_metacarpal_l", "middle_01_l", "middle_02_l", 
+                    "middle_03_l", "pinky_metacarpal_l", "pinky_01_l", "pinky_02_l", "pinky_03_l", "ring_metacarpal_l", "ring_01_l", "ring_02_l", 
+                    "ring_03_l", "thumb_01_l", "thumb_02_l", "thumb_03_l", "lowerarm_twist_01_l", "lowerarm_twist_02_l", "upperarm_twist_01_l", 
+                    "upperarm_twist_02_l", "clavicle_r", "upperarm_r", "lowerarm_r", "hand_r", "index_metacarpal_r", "index_01_r", "index_02_r", 
+                    "index_03_r", "middle_metacarpal_r", "middle_01_r", "middle_02_r", "middle_03_r", "pinky_metacarpal_r", "pinky_01_r", 
+                    "pinky_02_r", "pinky_03_r", "ring_metacarpal_r", "ring_01_r", "ring_02_r", "ring_03_r", "thumb_01_r", "thumb_02_r", 
+                    "thumb_03_r", "lowerarm_twist_01_r", "lowerarm_twist_02_r", "upperarm_twist_01_r", "upperarm_twist_02_r", "neck_01", 
+                    "neck_02", "head", "thigh_l", "calf_l", "calf_twist_01_l", "calf_twist_02_l", "foot_l", "ball_l", "thigh_twist_01_l", 
+                    "thigh_twist_02_l", "thigh_r", "calf_r", "calf_twist_01_r", "calf_twist_02_r", "foot_r", "ball_r", "thigh_twist_01_r", 
+                    "thigh_twist_02_r"}
+
+        normalizedUE = {self.NormalizeName(b): b for b in ueBones}
+        sourceBone = self.FindCharacterSkeleton()
+
+        def Recurse(node: fbx.FbxNode):
+
+            for i in range(node.GetChildCount()):
+                child = node.GetChild(i)
+
+                srcName = child.GetName()
+                normSrc = self.NormalizeName(srcName)
+
+                bestMatch = None
+                bestScore = 0.0
+
+                for normTgt, tgtName in normalizedUE.items():
+                    score = self.Similarity(normSrc, normTgt)
+
+                    if score > bestScore:
+                        bestScore = score
+                        bestMatch = tgtName
+
+                if bestScore >= 0.5:
+                    print(f"Renaming {srcName} → {bestMatch} ({bestScore:.2f})")
+                    child.SetName(bestMatch)
+
+                Recurse(child)
+
+        Recurse(sourceBone)
+
+            
+
