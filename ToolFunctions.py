@@ -41,19 +41,6 @@ class ToolMethods(QObject):
         if self.FilePath != "":
             shutil.copy2(self.FilePath, "./FileBackup") #Calling shutils 'copy2'   is better than normal 'copy' as it attempts to preserve metadata
 
-    #Assigning Slot to this allows it to be called from qml
-    @pyqtSlot()
-    def ImportFile(self): #Opens the file explorer so that the user can select the animation file
-        tk.Tk().withdraw()
-
-        #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
-        self.FilePath = askopenfilename(filetypes=[("FBX Files", ".fbx")])
-        print("user chose ", self.FilePath)
-
-        ToolMethods.BackupFile(self)
-        
-
-    #Cleanup functions
     #Imports the scene to access the elements
     def ImportSceneFbx(self):
         Importer = fbx.FbxImporter.Create(self.Manager, "Importer")
@@ -68,7 +55,20 @@ class ToolMethods(QObject):
         Importer.Import(self.Scene)
         Importer.Destroy()
 
+    #Assigning Slot to this allows it to be called from qml
+    @pyqtSlot()
+    def ImportFile(self): #Opens the file explorer so that the user can select the animation file
+        tk.Tk().withdraw()
 
+        #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
+        self.FilePath = askopenfilename(filetypes=[("FBX Files", ".fbx")])
+        print("user chose ", self.FilePath)
+
+        ToolMethods.BackupFile(self)
+        self.ImportSceneFbx()
+        
+
+    #Cleanup functions
     #Debug function to show how many nodes have been found
     def PrintNodeCount(self):
         print(f"Cameras found: {len(self.Cameras)}")
@@ -104,7 +104,6 @@ class ToolMethods(QObject):
     @pyqtSlot()
     def FindNodes(self):
         print(self.FilePath)
-        self.ImportSceneFbx()
         root = self.Scene.GetRootNode()
         if root:
             self.FindNodesRecursive(root)
@@ -171,70 +170,147 @@ class ToolMethods(QObject):
         self.ULMarkers.clear()
         self.ExportScene()
     
+
+
     #Edit Functions
-    #Gets the skeletal bones
-    def FindSkeletonRoot(self, node: fbx.FbxNode) -> list[fbx.FbxNode]:
+    #Finds top level skeleton nodes but doesn't stop when finding one
+    def FindSkeletonRoots(self, node: fbx.FbxNode, roots: list[fbx.FbxNode]):
         attr = node.GetNodeAttribute()
+        print(node.GetChildCount())
 
         if attr and attr.GetAttributeType() == fbx.FbxNodeAttribute.EType.eSkeleton:
-            return node
+            parent = node.GetParent()
+
+            if not parent or not parent.GetNodeAttribute() or \
+            parent.GetNodeAttribute().GetAttributeType() != fbx.FbxNodeAttribute.EType.eSkeleton:
+                roots.append(node)
         
         for i in range(node.GetChildCount()):
-            found = self.FindSkeletonRoot(node.GetChild(i))
-            if found:
-                return found
-        
-        return None
+            self.FindSkeletonRoots(node.GetChild(i), roots)
     
 
-    #Checks if there is a root bone
-    def HasRootBone(skeletonNodes: list[fbx.FbxNode]) -> bool:
-        for node in skeletonNodes:
-            if node.GetName().lower() == "root":
-                return True
-            
-            return False
+    #Counts bones under the skeleton roots
+    def CountSkeletonBones(self, node: fbx.FbxNode) -> int:
+        count = 1
+        for i in range(node.GetChildCount()):
+            count += self.CountSkeletonBones(node.GetChild(i))
         
-    #Creates the root bone and reparents the skeleton to the root bone
-    def CreateRootBone(self, skeleton: list[fbx.FbxNode]) -> fbx.FbxNode:
-        
-        scene = self.Scene
+        return count
+    
 
-        #Create skeleton attribute
+    #Finds the character skeleton based on the amount of bones
+    def FindCharacterSkeleton(self) -> fbx.FbxNode | None:
+
+        #Makes the list that 'FindSkeletonRoots' appends to
+        roots: list[fbx.FbxNode] = []
+        self.FindSkeletonRoots(self.Scene.GetRootNode(), roots)
+
+        #If there are no skeleton bones found return none
+        if not roots:
+            print("No bones found.")
+            return None
+        
+        #Initialises best root and best count vars
+        bestRoot = None #Will hold the character root bone
+        bestCount = 0   #Best count set to 0 to be overriden by root counts
+
+        for root in roots:
+            count = self.CountSkeletonBones(root)
+            print(f"Skeleton '{root.GetName()}' has {count} bones")
+
+            if count > bestCount:
+                bestCount = count
+                bestRoot = root
+        
+        return bestRoot
+    
+    def CollectSkeletonBones(self, root: fbx.FbxNode) -> list[fbx.FbxNode]:
+        bones = []
+
+        def recurse(n: fbx.FbxNode):
+            bones.append(n)
+            for i in range(n.GetChildCount()):
+                recurse(n.GetChild(i))
+
+        recurse(root)
+        return bones
+
+    #Creates the root bone and reparents the skeleton to the root bone
+    def CreateRootBone(self, pelvisNode: fbx.FbxNode) -> fbx.FbxNode:
+        scene = self.Scene
+        sceneRoot = scene.GetRootNode()
+
+        pelvisGlobal = pelvisNode.EvaluateGlobalTransform()
+
+        # Create skeleton attribute
         rootSkel = fbx.FbxSkeleton.Create(scene, "root")
         rootSkel.SetSkeletonType(fbx.FbxSkeleton.EType.eRoot)
 
-        #Create node
+        # Create root node
         rootNode = fbx.FbxNode.Create(scene, "root")
         rootNode.SetNodeAttribute(rootSkel)
 
-        #Zero Transforms
-        rootNode.LclTranslation.Set(fbx.FbxDouble3(0, 0, 0))
-        rootNode.LclRotation.Set(fbx.FbxDouble3(0, 0, 0))
-        rootNode.LclScaling.Set(fbx.FbxDouble3(1, 1, 1))
+        # Match pelvis global transform
+        t = pelvisGlobal.GetT()
+        r = pelvisGlobal.GetR()
+        s = pelvisGlobal.GetS()
 
-        sceneRoot = scene.GetRootNode()
+        rootNode.LclTranslation.Set(fbx.FbxDouble3(t[0], t[1], t[2]))
+        rootNode.LclRotation.Set(fbx.FbxDouble3(r[0], r[1], r[2]))
+        rootNode.LclScaling.Set(fbx.FbxDouble3(s[0], s[1], s[2]))
+
+        # Insert root above pelvis
         sceneRoot.AddChild(rootNode)
+        sceneRoot.RemoveChild(pelvisNode)
+        rootNode.AddChild(pelvisNode)
 
-        #Reparent Skeleton
-        for skel in skeleton:
-            sceneRoot.RemoveChild(skel)
-            rootNode.AddChild(skel)
-        
         return rootNode
+    
+
+    #Update Bind Pose
+    def UpdateBindPose(self):
+        scene = self.Scene
+        poseCount = scene.GetPoseCount()
+
+        for i in range(poseCount):
+            pose = scene.GetPose(i)
+
+            if pose.IsBindPose():
+                scene.RemovePose(i)
+                break
+
+        bindPose = fbx.FbxPose.Create(scene, "BindPose")
+        bindPose.SetIsBindPose(True)
+
+        def AddToPose(node: fbx.FbxNode):
+            globalAMatrix = node.EvaluateGlobalTransform()
+            globalMatrix = fbx.FbxMatrix(globalAMatrix)
+
+            bindPose.Add(node, globalMatrix)
+            
+            for i in range(node.GetChildCount()):
+                AddToPose(node.GetChild(i))
+
+        AddToPose(scene.GetRootNode())
+        scene.AddPose(bindPose)
     
     @pyqtSlot()
     def EnsureRootBone(self):
-        sceneRoot = self.Scene.GetRootNode()
-        skeletonBones = self.FindSkeleton(sceneRoot)
+        skelRoot = self.FindCharacterSkeleton()
 
-        if not skeletonBones:
+        if not skelRoot:
             print("No skeleton found in scene.")
             return
         
-        if self.HasRootBone(skeletonBones):
-            print ("Root bone already exists.")
+
+        if skelRoot.GetName().lower() in ("root", "armature"):
+            print("Skeleton already has a root bone.")
             return
         
-        print("No root bone found. Creating root bone.")
-        self.CreateRootBone(skeletonBones)
+        pelvisNode = skelRoot
+        print(f"Pelvis bone detected as '{pelvisNode.GetName()}'")
+
+        print ("Creating root bone")
+        rootNode = self.CreateRootBone(pelvisNode)
+        
+        self.UpdateBindPose()
