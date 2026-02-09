@@ -77,98 +77,199 @@ ApplicationWindow {
         Item {
             id: cleanupTab
 
-            Column {
-                width: 200
-                height: 300
-                spacing: 20
+            Row {
                 anchors.centerIn: parent
 
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.FindNodes()
-                    }
+                width: 400
+                height: 300
+                spacing: 20
 
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Find Nodes"
-                    color: "#000000"
-                    font: "24"
+                Column {
+                    width: 200
+                    height: 300
+                    spacing: 20
+
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.FindNodes()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Find Nodes"
+                        color: "#000000"
+                        font: "24"
+                        }
                     }
-                }
             
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.DeleteCameras()
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.DeleteCameras()
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Delete Cameras."
+                            color: "#000000"
+                            font: "24"
+                        }
                     }
 
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Delete Cameras."
-                    color: "#000000"
-                    font: "24"
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.DeleteULMarkers()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Delete Un-labelled Markers."
+                        color: "#000000"
+                        font: "24"
+                        }
                     }
                 }
 
-                Button {
+                Column {
                     width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.DeleteULMarkers()
-                    }
+                    height: 300
+                    spacing: 20
 
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Delete Un-labelled Markers."
-                    color: "#000000"
-                    font: "24"
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.FindNodes()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Find Nodes"
+                        color: "#000000"
+                        font: "24"
+                        }
                     }
-                }
-            }
             
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.DeleteCameras()
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Delete Cameras."
+                            color: "#000000"
+                            font: "24"
+                        }
+                    }
+
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.DeleteULMarkers()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Delete Un-labelled Markers."
+                        color: "#000000"
+                        font: "24"
+                        }
+                    }
+                }
+            }  
         }
         Item {
             id: editTab
 
-            Column {
-                width: 200
-                height: 200
-                spacing: 20
+            Row {
                 anchors.centerIn: parent
 
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.EnsureRootBone()
-                    }
+                width: 400
+                height: 200
+                spacing: 20
 
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Add Root Bone"
-                    color: "#000000"
-                    font: "24"
+                Column {
+                    width: 200
+                    height: 200
+                    spacing: 20
+
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.EnsureRootBone()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Add Root Bone"
+                        color: "#000000"
+                        font: "24"
+                        }
+                    }
+            
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.RenameSkeleton()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Rename Skeleton"
+                        color: "#000000"
+                        font: "24"
+                        }
                     }
                 }
-            
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.RenameSkeleton()
-                    }
 
-                    Text {
-                    anchors.centerIn: parent
-                    text: "Rename Skeleton"
-                    color: "#000000"
-                    font: "24"
+                Column {
+                    width: 200
+                    height: 200
+                    spacing: 20
+
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.EnsureRootBone()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Add Root Bone"
+                        color: "#000000"
+                        font: "24"
+                        }
+                    }
+            
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.RenameSkeleton()
+                        }
+
+                        Text {
+                        anchors.centerIn: parent
+                        text: "Rename Skeleton"
+                        color: "#000000"
+                        font: "24"
+                        }
                     }
                 }
             }
+            
         }
     }
 }
