@@ -11,7 +11,7 @@ import re
 import shutil #High level file operations module
 
 #Essential library for QObjects and Slot to pass through methods to qml
-from PyQt6.QtCore import QObject, pyqtSlot
+from PyQt6.QtCore import QObject, QString, pyqtSlot
 
 import fbx
 
@@ -27,6 +27,12 @@ class ToolMethods(QObject):
 
     FilePath = ""
 
+    #Progress Vars
+    NodeProgress = ""
+    CameraProgress = ""
+    MarkerProgress = ""
+    RootBoneProgress = ""
+
     #FBX SDK Objects
     Manager = fbx.FbxManager.Create()
     Scene = fbx.FbxScene.Create(Manager, "Scene")
@@ -34,12 +40,22 @@ class ToolMethods(QObject):
     #Get Root Node (The parent of all the scene elements)
     Root = Scene.GetRootNode()
 
-    
+
     #Import functions
     #Constructor
     def __init__(self):
         super().__init__()
         self.FilePath = ""
+
+
+    #Progress Functions
+    def SetFindingNodesProgress(self, progress: str):
+        self.NodeProgress = progress
+
+    @pyqtSlot()
+    def GetFindingNodesProgress(self) -> QString:
+        return self.NodeProgress
+    
 
     def BackupFile(self):
         if self.FilePath != "":
@@ -110,6 +126,7 @@ class ToolMethods(QObject):
     def FindNodes(self):
         root = self.Scene.GetRootNode()
         if root:
+            self.SetFindingNodesProgress("Looking through all scene elements...\nSearching for 'camera' & 'marker' attributes...")
             self.FindNodesRecursive(root)
             self.PrintNodeCount()
 
@@ -453,5 +470,6 @@ class ToolMethods(QObject):
 
         Recurse(sourceBone)
 
-            
+    
 
+            

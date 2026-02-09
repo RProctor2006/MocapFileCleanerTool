@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 ApplicationWindow {
     visible: true
@@ -136,52 +137,52 @@ ApplicationWindow {
                 }
 
                 Column {
-                    width: 200
-                    height: 300
                     spacing: 20
+                    width: 400
+                    height: 300
 
-                    Button {
+                    Rectangle {
                         width: 200
                         height: 100
-                        onClicked: {
-                            Tools.FindNodes()
-                        }
+                        color: "#000000"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
 
                         Text {
-                        anchors.centerIn: parent
-                        text: "Find Nodes"
-                        color: "#000000"
-                        font: "24"
+                            padding: 10
+                            text: Tools.GetFindingNodesProgress()
+                            color: "#ffffff"
                         }
                     }
             
-                    Button {
+                    Rectangle {
                         width: 200
                         height: 100
-                        onClicked: {
-                            Tools.DeleteCameras()
-                        }
+                        color: "#000000"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
 
                         Text {
-                            anchors.centerIn: parent
-                            text: "Delete Cameras."
-                            color: "#000000"
-                            font: "24"
+                            padding: 10
+                            text: "Deleting Cameras..."
+                            color: "#ffffff"
                         }
                     }
 
-                    Button {
+                    Rectangle {
                         width: 200
                         height: 100
-                        onClicked: {
-                            Tools.DeleteULMarkers()
-                        }
+                        color: "#000000"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
 
                         Text {
-                        anchors.centerIn: parent
-                        text: "Delete Un-labelled Markers."
-                        color: "#000000"
-                        font: "24"
+                            padding: 10
+                            text: "Deleting Cameras"
+                            color: "#ffffff"
                         }
                     }
                 }
