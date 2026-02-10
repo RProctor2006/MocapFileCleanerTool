@@ -11,7 +11,7 @@ import re
 import shutil #High level file operations module
 
 #Essential library for QObjects and Slot to pass through methods to qml
-from PyQt6.QtCore import QObject, QString, pyqtSlot
+from PySide6.QtCore import QObject, Property, Signal, Slot
 
 import fbx
 
@@ -27,11 +27,15 @@ class ToolMethods(QObject):
 
     FilePath = ""
 
-    #Progress Vars
-    NodeProgress = ""
-    CameraProgress = ""
-    MarkerProgress = ""
-    RootBoneProgress = ""
+    NodeProgressChanged = Signal()
+    CameraProgressChanged=Signal()
+    MarkerProgressChanged=Signal()
+    RootBoneProgressChanged=Signal()
+
+    NodeProgress: str = "..."
+    CameraProgress: str = "..."
+    MarkerProgress: str = "..."
+    RootBoneProgress: str = "..."
 
     #FBX SDK Objects
     Manager = fbx.FbxManager.Create()
@@ -47,14 +51,54 @@ class ToolMethods(QObject):
         super().__init__()
         self.FilePath = ""
 
+        #Progress Vars
+        self.NodeProgress: str = "..."
+        self.CameraProgress: str = "..."
+        self.MarkerProgress: str = "..."
+        self.RootBoneProgress: str = "..."
+
 
     #Progress Functions
     def SetFindingNodesProgress(self, progress: str):
-        self.NodeProgress = progress
+        if self.NodeProgress != progress:
+            self.NodeProgress += progress
+            self.NodeProgressChanged.emit()
 
-    @pyqtSlot()
-    def GetFindingNodesProgress(self) -> QString:
+    def GetFindingNodesProgress(self):
         return self.NodeProgress
+    
+    NodeUpdate = Property(str, GetFindingNodesProgress, notify=NodeProgressChanged)
+
+    
+    def SetDeleteCameraProgress(self, progress: str):
+        if self.CameraProgress != progress:
+            self.CameraProgress += progress
+            self.CameraProgressChanged.emit()
+
+    def GetDeleteCameraProgress(self):
+        return self.CameraProgress
+    
+    CameraUpdate = Property(str, GetDeleteCameraProgress, notify=CameraProgressChanged)
+
+    def SetDeleteMarkerProgress(self, progress: str):
+        if self.MarkerProgress != progress:
+            self.MarkerProgress += progress
+            self.MarkerProgressChanged.emit()
+
+    def GetDeleteMarkerProgress(self):
+        return self.MarkerProgress
+    
+    MarkerUpdate = Property(str, GetDeleteMarkerProgress, notify=MarkerProgressChanged)
+
+    def SetCreateRootBoneProgress(self, progress: str):
+        if self.RootBoneProgress != progress:
+            self.RootBoneProgress += progress
+            self.RootBoneProgressChanged.emit()
+
+    def GetCreateRootBoneProgress(self):
+        return self.RootBoneProgress
+    
+    RootBoneUpdate = Property(str, GetCreateRootBoneProgress, notify=RootBoneProgressChanged)
     
 
     def BackupFile(self):
@@ -76,7 +120,7 @@ class ToolMethods(QObject):
         Importer.Destroy()
 
     #Assigning Slot to this allows it to be called from qml
-    @pyqtSlot()
+    @Slot()
     def ImportFile(self): #Opens the file explorer so that the user can select the animation file
         tk.Tk().withdraw()
 
@@ -96,7 +140,7 @@ class ToolMethods(QObject):
 
 
     #Temporary export function to test deletion methods
-    @pyqtSlot()
+    @Slot()
     def ExportScene(self):
         OutputPath = "./Exports/TestExport"
 
@@ -122,13 +166,13 @@ class ToolMethods(QObject):
 
     #Pre function of recursive node finder function
     #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
-    @pyqtSlot()
+    @Slot()
     def FindNodes(self):
         root = self.Scene.GetRootNode()
         if root:
-            self.SetFindingNodesProgress("Looking through all scene elements...\nSearching for 'camera' & 'marker' attributes...")
+            self.SetFindingNodesProgress("\n>> Looking through all scene elements...\n>> Searching for 'camera' & 'marker' attributes...")
             self.FindNodesRecursive(root)
-            self.PrintNodeCount()
+            self.SetFindingNodesProgress(f"\n>> Found {len(self.Cameras)} cameras...\n>> Found {len(self.ULMarkers)} un-labelled markers...")
 
     #Recursively checks all of the root children for cameras and markers
     def FindNodesRecursive(self, node: fbx.FbxNode):
@@ -154,12 +198,12 @@ class ToolMethods(QObject):
             self.FindNodesRecursive(child)
 
 
-    @pyqtSlot()
+    @Slot()
     def DeleteCameras(self):
         
         #Check if there are cameras to delete
         if not self.Cameras:
-            print("No cameras to delete.")
+            self.SetDeleteCameraProgress("\n>> No cameras to delete.")
             return
         
         #Iterates through all found cameras
@@ -171,14 +215,14 @@ class ToolMethods(QObject):
                 
             cameraNode.Destroy()
 
-        print("Cameras deleted.")
+        self.SetDeleteCameraProgress("\n>> Cameras deleted.")
         self.Cameras.clear()
 
-    @pyqtSlot()
+    @Slot()
     def DeleteULMarkers(self):
 
         if not self.ULMarkers:
-            print("No un-labelled markers to delete.")
+            self.SetDeleteMarkerProgress("\n>> No un-labelled markers to delete.")
             return
         
         for marker in self.ULMarkers:
@@ -189,7 +233,7 @@ class ToolMethods(QObject):
 
             marker.Destroy()
 
-        print("Un-labelled markers deleted.")
+        self.SetDeleteMarkerProgress("\n>> Un-labelled markers deleted.")
         self.ULMarkers.clear()
     
 
@@ -259,8 +303,10 @@ class ToolMethods(QObject):
     def CreateRootBone(self, pelvisNode: fbx.FbxNode) -> fbx.FbxNode:
         scene = self.Scene
         pelvisParent = pelvisNode.GetParent()
+        self.SetCreateRootBoneProgress("\n>> Found skeleton container.")
 
         pelvisGlobal = pelvisNode.EvaluateGlobalTransform()
+        self.SetCreateRootBoneProgress("\n>> Retrieved pelvis global transform.")
 
         # Create skeleton attribute
         rootSkel = fbx.FbxSkeleton.Create(scene, "root")
@@ -269,6 +315,7 @@ class ToolMethods(QObject):
         # Create root node
         rootNode = fbx.FbxNode.Create(scene, "root")
         rootNode.SetNodeAttribute(rootSkel)
+        self.SetCreateRootBoneProgress("\n>> Created root bone node.")
 
         # Match pelvis global transform
         t = pelvisGlobal.GetT()
@@ -278,11 +325,13 @@ class ToolMethods(QObject):
         rootNode.LclTranslation.Set(fbx.FbxDouble3(t[0], t[1], t[2]))
         rootNode.LclRotation.Set(fbx.FbxDouble3(r[0], r[1], r[2]))
         rootNode.LclScaling.Set(fbx.FbxDouble3(s[0], s[1], s[2]))
+        self.SetCreateRootBoneProgress("\n>> Set root bone transform")
 
         # Insert root above pelvis
         pelvisParent.AddChild(rootNode)
         pelvisParent.RemoveChild(pelvisNode)
         rootNode.AddChild(pelvisNode)
+        self.SetCreateRootBoneProgress("\n>> Inserted root bone above pelvis")
 
         return rootNode
     
@@ -319,25 +368,26 @@ class ToolMethods(QObject):
         scene.AddPose(bindPose)
     
 
-    @pyqtSlot()
+    @Slot()
     def EnsureRootBone(self):
         skelRoot = self.FindCharacterSkeleton()
 
         if not skelRoot:
-            print("No skeleton found in scene.")
+            self.SetCreateRootBoneProgress("\n>> No skeleton found in the scene. Has the file been imported?")
             return
         
 
         if skelRoot.GetName().lower() in ("root", "armature"):
-            print("Skeleton already has a root bone.")
+            self.SetCreateRootBoneProgress("\n>> Skeleton already has a root bone.")
             return
         
         pelvisNode = skelRoot
-        print(f"Pelvis bone detected as '{pelvisNode.GetName()}'")
+        self.SetCreateRootBoneProgress(f"\n>> Pelvis bone detected as '{pelvisNode.GetName()}'")
 
-        print ("Creating root bone")
+        self.SetCreateRootBoneProgress("\n>> Creating root bone.")
         self.CreateRootBone(pelvisNode)
         
+        self.SetCreateRootBoneProgress("\n>> Updating bind pose.")
         self.UpdateBindPose()
 
     def NormalizeName(self, name: str) -> str:
@@ -427,7 +477,7 @@ class ToolMethods(QObject):
     def Similarity(self, a, b) -> float:
         return SequenceMatcher(None, a, b).ratio()
     
-    @pyqtSlot()
+    @Slot()
     def RenameSkeleton(self):
         ueBones = {"root", "pelvis", "spine_01", "spine_02", "spine_03", "spine_04", "spine_05", "clavicle_l", "upperarm_l", "lowerarm_l",
                     "hand_l", "index_metacarpal_l", "index_01_l", "index_02_l", "index_03_l", "middle_metacarpal_l", "middle_01_l", "middle_02_l", 

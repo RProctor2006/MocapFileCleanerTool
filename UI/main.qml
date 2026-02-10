@@ -148,11 +148,25 @@ ApplicationWindow {
                         border.color: '#4d4d4d'
                         border.width: 3
                         radius: 10
+ 
+                        ScrollView {
+                            anchors.fill: parent
 
-                        Text {
-                            padding: 10
-                            text: Tools.GetFindingNodesProgress()
-                            color: "#ffffff"
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.NodeUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
                         }
                     }
             
@@ -164,10 +178,24 @@ ApplicationWindow {
                         border.width: 3
                         radius: 10
 
-                        Text {
-                            padding: 10
-                            text: "Deleting Cameras..."
-                            color: "#ffffff"
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.CameraUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
                         }
                     }
 
@@ -179,10 +207,24 @@ ApplicationWindow {
                         border.width: 3
                         radius: 10
 
-                        Text {
-                            padding: 10
-                            text: "Deleting Cameras"
-                            color: "#ffffff"
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.MarkerUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
                         }
                     }
                 }
@@ -239,18 +281,32 @@ ApplicationWindow {
                     height: 200
                     spacing: 20
 
-                    Button {
+                    Rectangle {
                         width: 200
                         height: 100
-                        onClicked: {
-                            Tools.EnsureRootBone()
-                        }
-
-                        Text {
-                        anchors.centerIn: parent
-                        text: "Add Root Bone"
                         color: "#000000"
-                        font: "24"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
+
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.RootBoneUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
                         }
                     }
             

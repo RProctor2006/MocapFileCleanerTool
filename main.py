@@ -6,8 +6,8 @@ import os
 from ToolFunctions import ToolMethods
 
 #Essential library for UI
-from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtQml import QQmlApplicationEngine
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
 
 #Sets up the app variables
 app = QGuiApplication(sys.argv)
