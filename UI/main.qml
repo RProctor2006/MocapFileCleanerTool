@@ -36,40 +36,110 @@ ApplicationWindow {
         Item {
             id: importTab
             
-
-            Column {
-                width: 200
-                height: 200
-                spacing: 20
+            Row {
                 anchors.centerIn: parent
 
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.ImportFile()
-                    }
+                width: 400
+                height: 200
+                spacing: 20
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Import File"
-                        color: "#000000"
-                        font: "24"
+                Column {
+                    width: 200
+                    height: 200
+                    spacing: 20
+
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.ImportFile()
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Import .fbx File"
+                            color: "#000000"
+                            font: "24"
+                        }
+                    }
+            
+                    Button {
+                        width: 200
+                        height: 100
+                        onClicked: {
+                            Tools.ExportScene()
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Export File"
+                            color: "#000000"
+                            font: "24"
+                        }
                     }
                 }
-            
-                Button {
-                    width: 200
-                    height: 100
-                    onClicked: {
-                        Tools.ExportScene()
-                    }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Export File"
+                Column {
+                    spacing: 20
+                    width: 400
+                    height: 300
+
+                    Rectangle {
+                        width: 200
+                        height: 100
                         color: "#000000"
-                        font: "24"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
+ 
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.ImportUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
+                        }
+                    }
+            
+                    Rectangle {
+                        width: 200
+                        height: 100
+                        color: "#000000"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
+
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.ExportUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
+                        }
                     }
                 }
             }
@@ -259,6 +329,8 @@ ApplicationWindow {
                         font: "24"
                         }
                     }
+
+                    
             
                     Button {
                         width: 200
@@ -269,10 +341,18 @@ ApplicationWindow {
 
                         Text {
                         anchors.centerIn: parent
-                        text: "Rename Skeleton"
+                        text: "Rename Skeleton to UE Skeleton"
+                        wrapMode: Text.Wrap
                         color: "#000000"
                         font: "24"
                         }
+                    }
+
+                    Text{
+                        width: 400
+                        wrapMode: Text.Wrap
+                        color: '#ff0000'
+                        text: "Warning! This operation works for most of the skeleton but not all of it. Some bones will be misnamed. Manual checking is advised.\nAdding a root bone first is recommended."
                     }
                 }
 
@@ -310,18 +390,32 @@ ApplicationWindow {
                         }
                     }
             
-                    Button {
+                    Rectangle {
                         width: 200
                         height: 100
-                        onClicked: {
-                            Tools.RenameSkeleton()
-                        }
-
-                        Text {
-                        anchors.centerIn: parent
-                        text: "Rename Skeleton"
                         color: "#000000"
-                        font: "24"
+                        border.color: '#4d4d4d'
+                        border.width: 3
+                        radius: 10
+
+                        ScrollView {
+                            anchors.fill: parent
+
+                            //Disables scroll bar visual
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                            Column {
+                                width: parent.width
+
+                                Text {
+                                    width: parent.width
+                                    padding: 10
+                                    wrapMode: Text.Wrap
+                                    text: Tools.SkeletonUpdate
+                                    color: "#ffffff"
+                                }
+                            }       
                         }
                     }
                 }

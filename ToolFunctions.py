@@ -27,15 +27,23 @@ class ToolMethods(QObject):
 
     FilePath = ""
 
-    NodeProgressChanged = Signal()
+    #Progress changed signals
+    ImportProgressChanged=Signal()
+    ExportProgressChanged=Signal()
+    NodeProgressChanged=Signal()
     CameraProgressChanged=Signal()
     MarkerProgressChanged=Signal()
     RootBoneProgressChanged=Signal()
+    SkeletonProgressChanged=Signal()
 
+    #Progress string variables
+    ImportProgress: str = "..."
+    ExportProgress: str = "..."
     NodeProgress: str = "..."
     CameraProgress: str = "..."
     MarkerProgress: str = "..."
     RootBoneProgress: str = "..."
+    RenameSkeletonProgress: str = "..."
 
     #FBX SDK Objects
     Manager = fbx.FbxManager.Create()
@@ -52,13 +60,38 @@ class ToolMethods(QObject):
         self.FilePath = ""
 
         #Progress Vars
+        self.ImportProgress: str = "..."
+        self.ExportProgress: str = "..."
         self.NodeProgress: str = "..."
         self.CameraProgress: str = "..."
         self.MarkerProgress: str = "..."
         self.RootBoneProgress: str = "..."
+        self.RenameSkeletonProgress: str = "..."
 
 
     #Progress Functions
+    def SetImportingFileProgress(self, progress: str):
+        if self.ImportProgress != progress:
+            self.ImportProgress += progress
+            self.ImportProgressChanged.emit()
+
+    def GetImportingFileProgress(self):
+        return self.ImportProgress
+    
+    ImportUpdate = Property(str, GetImportingFileProgress, notify=ImportProgressChanged)
+
+
+    def SetExportingFileProgress(self, progress: str):
+        if self.ExportProgress != progress:
+            self.ExportProgress += progress
+            self.ExportProgressChanged.emit()
+
+    def GetExportingFileProgress(self):
+        return self.ExportProgress
+    
+    ExportUpdate = Property(str, GetExportingFileProgress, notify=ExportProgressChanged)
+
+
     def SetFindingNodesProgress(self, progress: str):
         if self.NodeProgress != progress:
             self.NodeProgress += progress
@@ -80,6 +113,7 @@ class ToolMethods(QObject):
     
     CameraUpdate = Property(str, GetDeleteCameraProgress, notify=CameraProgressChanged)
 
+
     def SetDeleteMarkerProgress(self, progress: str):
         if self.MarkerProgress != progress:
             self.MarkerProgress += progress
@@ -90,6 +124,7 @@ class ToolMethods(QObject):
     
     MarkerUpdate = Property(str, GetDeleteMarkerProgress, notify=MarkerProgressChanged)
 
+
     def SetCreateRootBoneProgress(self, progress: str):
         if self.RootBoneProgress != progress:
             self.RootBoneProgress += progress
@@ -99,6 +134,17 @@ class ToolMethods(QObject):
         return self.RootBoneProgress
     
     RootBoneUpdate = Property(str, GetCreateRootBoneProgress, notify=RootBoneProgressChanged)
+
+
+    def SetSkeletonRenameProgress(self, progress: str):
+        if self.RenameSkeletonProgress != progress:
+            self.RenameSkeletonProgress += progress
+            self.SkeletonProgressChanged.emit()
+
+    def GetSkeletonRenameProgress(self):
+        return self.RenameSkeletonProgress
+    
+    SkeletonUpdate = Property(str, GetSkeletonRenameProgress, notify=SkeletonProgressChanged)
     
 
     def BackupFile(self):
@@ -111,7 +157,7 @@ class ToolMethods(QObject):
 
         #Import FBX file
         if not Importer.Initialize(self.FilePath, -1, None):
-            print(f"Failed to initialize importer for {self.FilePath}")
+            self.SetExportingFileProgress(f"\n>> Failed to initialize importer for {self.FilePath}")
             Importer.Destroy #Manual garbage collection since the sdk is a C++ library wrapped in python there is risk 
             self.Manager.Destroy  #of memory not being fully managed by Pythons GC, ensures no memory leaks and other problems
             return
@@ -126,10 +172,16 @@ class ToolMethods(QObject):
 
         #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
         self.FilePath = askopenfilename(filetypes=[("FBX Files", ".fbx")])
-        print("user chose ", self.FilePath)
+        self.SetImportingFileProgress(f"\n>> user chose {self.FilePath}")
+        print(self.GetFileName(self.FilePath))
 
         ToolMethods.BackupFile(self)
         self.ImportSceneFbx()
+
+
+    def GetFileName(self, FilePath: str) -> str:
+        return os.path.basename(FilePath)
+    
         
 
     #Cleanup functions
@@ -142,11 +194,11 @@ class ToolMethods(QObject):
     #Temporary export function to test deletion methods
     @Slot()
     def ExportScene(self):
-        OutputPath = "./Exports/TestExport"
+        OutputPath = f"./Exports/{self.GetFileName(self.FilePath)}"
 
         #If no scene
         if not self.Scene:
-            print("No scene to export.")
+            self.SetExportingFileProgress("\n>> No scene to export.")
             return
         
         #Creates exporter object
@@ -154,14 +206,14 @@ class ToolMethods(QObject):
 
         #If can't initialize exporter
         if not exporter.Initialize(OutputPath, -1, self.Manager.GetIOSettings()):
-            print(f"Failed to initialize exporter for {OutputPath}")
+            self.SetExportingFileProgress(f"\n>> Failed to initialize exporter for {OutputPath}")
             exporter.Destroy()
             return
         
         exporter.Export(self.Scene)
         exporter.Destroy()
 
-        print(f"Scene exported to: {OutputPath}")
+        self.SetExportingFileProgress(f"\n>> Scene exported to: {OutputPath}")
 
 
     #Pre function of recursive node finder function
@@ -390,6 +442,8 @@ class ToolMethods(QObject):
         self.SetCreateRootBoneProgress("\n>> Updating bind pose.")
         self.UpdateBindPose()
 
+        self.SetCreateRootBoneProgress("\n>> Root bone added successfully")
+
     def NormalizeName(self, name: str) -> str:
         name = name.lower()
 
@@ -491,9 +545,14 @@ class ToolMethods(QObject):
                     "thigh_twist_02_l", "thigh_r", "calf_r", "calf_twist_01_r", "calf_twist_02_r", "foot_r", "ball_r", "thigh_twist_01_r", 
                     "thigh_twist_02_r"}
 
-        normalizedUE = {self.NormalizeName(b): b for b in ueBones}
-        sourceBone = self.FindCharacterSkeleton()
 
+        normalizedUE = {self.NormalizeName(b): b for b in ueBones}
+        self.SetSkeletonRenameProgress("\n>> Normalize UE bone names")
+
+        sourceBone = self.FindCharacterSkeleton()
+        self.SetSkeletonRenameProgress("\n>> Finding character skeleton")
+
+        self.SetSkeletonRenameProgress("\n>> Looping through bones to find closest match")
         def Recurse(node: fbx.FbxNode):
 
             for i in range(node.GetChildCount()):
@@ -513,13 +572,13 @@ class ToolMethods(QObject):
                         bestMatch = tgtName
 
                 if bestScore >= 0.5:
-                    print(f"Renaming {srcName} → {bestMatch} ({bestScore:.2f})")
+                    self.SetSkeletonRenameProgress(f"\n>> Renaming {srcName} → {bestMatch} ({bestScore:.2f})")
                     child.SetName(bestMatch)
 
                 Recurse(child)
 
         Recurse(sourceBone)
-
+        self.SetSkeletonRenameProgress("\n>> Skeleton rename complete!")
     
 
             
