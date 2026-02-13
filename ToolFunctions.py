@@ -273,8 +273,8 @@ class ToolMethods(QObject):
         OutputPath = f"./Exports/{self.GetFileName()}"
 
         #If no scene
-        if not self.Scene:
-            self.SetExportingFileProgress("\n>> No scene to export.")
+        if self.FilePath == "":
+            self.SetExportingFileProgress("\n>> No file to export.")
             return
         
         #Creates exporter object
@@ -296,6 +296,10 @@ class ToolMethods(QObject):
     #Gets the root and checks if its valid to feed into the recursive function with the root node being passsed in
     @Slot()
     def FindNodes(self):
+        if self.FilePath == "":
+            self.SetFindingNodesProgress("\n>> No file imported.")
+            return
+
         root = self.Scene.GetRootNode()
         if root:
             self.SetFindingNodesProgress("\n>> Looking through all scene elements...\n>> Searching for 'camera' & 'marker' attributes...")
@@ -640,6 +644,10 @@ class ToolMethods(QObject):
                     "thigh_twist_02_l", "thigh_r", "calf_r", "calf_twist_01_r", "calf_twist_02_r", "foot_r", "ball_r", "thigh_twist_01_r", 
                     "thigh_twist_02_r"}
 
+
+        if not self.FindCharacterSkeleton():
+            self.SetSkeletonRenameProgress("\n>> No skeleton found. Has the file been imported?")
+            return
 
         normalizedUE = {self.NormalizeName(b): b for b in ueBones}
         self.SetSkeletonRenameProgress("\n>> Normalize UE bone names")
