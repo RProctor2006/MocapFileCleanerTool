@@ -1,156 +1,274 @@
 // CleanupPage.qml
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Item {
-    id: cleanupTab
+    ColumnLayout {
+        anchors.fill: parent
 
-    Row {
-        anchors.centerIn: parent
+        //This column allows for the 'Layout.alignment' properties to work since the StackLayout class stretches the items to max so layout
+        //is not taken into account
+        ColumnLayout {
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+            Layout.leftMargin: 20
+            spacing: 0
 
-        width: 400
-        height: 300
-        spacing: 20
-
-        Column {
-            width: 200
-            height: 300
-            spacing: 20
-
-            Button {
-                width: 200
-                height: 100
-                onClicked: {
-                    Tools.FindNodes();
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Find Nodes"
-                    color: "#000000"
-                    font: "24"
-                }
+            Label {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                text: "Cleanup Settings:"
+                color: "#000000"
+                font.bold: true
+                font.underline: true
+                font.pixelSize: 48
             }
-
-            Button {
-                width: 200
-                height: 100
-                onClicked: {
-                    Tools.DeleteCameras();
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Delete Cameras."
-                    color: "#000000"
-                    font: "24"
-                }
-            }
-
-            Button {
-                width: 200
-                height: 100
-                onClicked: {
-                    Tools.DeleteULMarkers();
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Delete Un-labelled Markers."
-                    color: "#000000"
-                    font: "24"
-                }
-            }
-        }
-
-        Column {
-            spacing: 20
-            width: 400
-            height: 300
 
             Rectangle {
-                width: 200
-                height: 100
-                color: "#000000"
-                border.color: '#4d4d4d'
-                border.width: 3
-                radius: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.preferredWidth: 700
+                Layout.preferredHeight: 250
 
-                ScrollView {
+                RowLayout {
                     anchors.fill: parent
+                    spacing: 10
 
-                    //Disables scroll bar visual
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    ColumnLayout {
+                        spacing: 10
 
-                    Column {
-                        width: parent.width
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 60
+                            onClicked: Tools.FindNodes()
 
-                        Text {
-                            width: parent.width
-                            padding: 10
-                            wrapMode: Text.Wrap
-                            text: Tools.NodeUpdate
-                            color: "#ffffff"
+                            Text {
+                                text: "Find Nodes"
+                                font.pixelSize: 34
+                                color: "#000000"
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.NodeUpdate
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        spacing: 10
+
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 60
+                            onClicked: Tools.DeleteCameras()
+
+                            Text {
+                                text: "Delete Cameras"
+                                font.pixelSize: 34
+                                color: "#000000"
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.CameraUpdate
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        spacing: 10
+
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 60
+                            onClicked: Tools.DeleteULMarkers()
+
+                            Text {
+                                text: "Delete Markers"
+                                font.pixelSize: 34
+                                color: "#000000"
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 250
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.MarkerUpdate
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
             Rectangle {
-                width: 200
-                height: 100
-                color: "#000000"
-                border.color: '#4d4d4d'
-                border.width: 3
-                radius: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.preferredWidth: 700
+                Layout.preferredHeight: 250
 
-                ScrollView {
+                ColumnLayout {
                     anchors.fill: parent
 
-                    //Disables scroll bar visual
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    Text {
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        text: "Cleanup Info:"
+                        font.pixelSize: 34
+                        color: "#000000"
+                    }
 
-                    Column {
-                        width: parent.width
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        Rectangle {
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                            Layout.preferredWidth: 350
+                            Layout.preferredHeight: 120
+                            color: '#9c9c9c'
+                            border.color: "#000000"
+                            border.width: 5
+                            radius: 10
 
-                        Text {
-                            width: parent.width
-                            padding: 10
-                            wrapMode: Text.Wrap
-                            text: Tools.CameraUpdate
-                            color: "#ffffff"
+                            Text {
+                                padding: 12
+                                color: "#000000"
+                                font.pixelSize: 24
+                                text: "Original:\n- Cameras: " + Tools.FileCameraCount + "\n- Un-labelled Markers: " + Tools.FileULMarkerCount
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                            Layout.preferredWidth: 350
+                            Layout.preferredHeight: 120
+                            color: '#9c9c9c'
+                            border.color: "#000000"
+                            border.width: 5
+                            radius: 10
+
+                            Text {
+                                padding: 12
+                                color: "#000000"
+                                font.pixelSize: 24
+                                text: "Modified:\n- Cameras: " + Tools.FileNewCamCount + "\n- Un-labelled Markers: " + Tools.FileNewULMarkCount
+                            }
                         }
                     }
                 }
             }
 
             Rectangle {
-                width: 200
-                height: 100
-                color: "#000000"
-                border.color: '#4d4d4d'
-                border.width: 3
-                radius: 10
+                Layout.topMargin: -10
+                Layout.bottomMargin: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.preferredWidth: 700
+                Layout.preferredHeight: 250
 
-                ScrollView {
+                ColumnLayout {
                     anchors.fill: parent
+                    spacing: 5
 
-                    //Disables scroll bar visual
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    Text {
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                        text: "Meta Data:"
+                        font.pixelSize: 34
+                        color: "#000000"
+                    }
 
-                    Column {
-                        width: parent.width
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        Layout.preferredWidth: 700
+                        Layout.preferredHeight: 215
+                        color: '#9c9c9c'
+                        border.color: "#000000"
+                        border.width: 5
+                        radius: 10
 
                         Text {
-                            width: parent.width
-                            padding: 10
-                            wrapMode: Text.Wrap
-                            text: Tools.MarkerUpdate
-                            color: "#ffffff"
+                            padding: 12
+                            color: "#000000"
+                            font.pixelSize: 28
+                            text: "• File Name: " + Tools.FbxFileName + "\n• Date Authored: " + Tools.FileDateAuthored + "\n• Last Accessed: " + Tools.FileLastAccessed + "\n• Last Modified: " + Tools.FileLastModified + "\n• File Size: " + Tools.FbxFileSize + "Mb"
                         }
                     }
                 }

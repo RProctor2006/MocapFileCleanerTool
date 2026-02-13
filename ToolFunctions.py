@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 #File dialog
 import tkinter as tk
@@ -32,9 +33,16 @@ class ToolMethods(QObject):
     ExportProgressChanged=Signal()
     NodeProgressChanged=Signal()
     CameraProgressChanged=Signal()
+    NewCamProgressChanged=Signal()
     MarkerProgressChanged=Signal()
+    NewMarkerProgressChanged=Signal()
     RootBoneProgressChanged=Signal()
     SkeletonProgressChanged=Signal()
+    SkeletonRenamed=Signal()
+
+    #Meta data changed signals
+    FileNameGot=Signal()
+    MetaDataGot=Signal()
 
     #Progress string variables
     ImportProgress: str = "..."
@@ -44,6 +52,13 @@ class ToolMethods(QObject):
     MarkerProgress: str = "..."
     RootBoneProgress: str = "..."
     RenameSkeletonProgress: str = "..."
+
+    #Meta data vars
+    FileName: str = "..."
+    DateAuthored: str = "..."
+    LastAccessed: str = "..."
+    LastModified: str = "..."
+    FileSize = 0
 
     #FBX SDK Objects
     Manager = fbx.FbxManager.Create()
@@ -68,6 +83,12 @@ class ToolMethods(QObject):
         self.RootBoneProgress: str = "..."
         self.RenameSkeletonProgress: str = "..."
 
+        #Meta data vars
+        self.FileName: str = "..."
+        self.DateAuthored: str = "..."
+        self.LastAccessed: str = "..."
+        self.LastModified: str = "..."
+        self.FileSize = 0
 
     #Progress Functions
     def SetImportingFileProgress(self, progress: str):
@@ -96,6 +117,8 @@ class ToolMethods(QObject):
         if self.NodeProgress != progress:
             self.NodeProgress += progress
             self.NodeProgressChanged.emit()
+            self.NewCamProgressChanged.emit()
+            self.NewMarkerProgressChanged.emit()
 
     def GetFindingNodesProgress(self):
         return self.NodeProgress
@@ -107,6 +130,7 @@ class ToolMethods(QObject):
         if self.CameraProgress != progress:
             self.CameraProgress += progress
             self.CameraProgressChanged.emit()
+            self.NewCamProgressChanged.emit()
 
     def GetDeleteCameraProgress(self):
         return self.CameraProgress
@@ -118,11 +142,24 @@ class ToolMethods(QObject):
         if self.MarkerProgress != progress:
             self.MarkerProgress += progress
             self.MarkerProgressChanged.emit()
+            self.NewMarkerProgressChanged.emit()
 
     def GetDeleteMarkerProgress(self):
         return self.MarkerProgress
     
     MarkerUpdate = Property(str, GetDeleteMarkerProgress, notify=MarkerProgressChanged)
+
+    def GetCameraCount(self):
+        return len(self.Cameras)
+    
+    FileCameraCount = Property(int, GetCameraCount, notify=NodeProgressChanged)
+    FileNewCamCount = Property(int, GetCameraCount, notify=NewCamProgressChanged)
+
+    def GetULMarkerCount(self):
+        return len(self.ULMarkers)
+    
+    FileULMarkerCount = Property(int, GetULMarkerCount, notify=NodeProgressChanged)
+    FileNewULMarkCount = Property(int, GetULMarkerCount, notify=NewMarkerProgressChanged)
 
 
     def SetCreateRootBoneProgress(self, progress: str):
@@ -145,6 +182,46 @@ class ToolMethods(QObject):
         return self.RenameSkeletonProgress
     
     SkeletonUpdate = Property(str, GetSkeletonRenameProgress, notify=SkeletonProgressChanged)
+
+    def SetFileName(self):
+        if self.FileName != os.path.basename(self.FilePath):
+            self.FileName = os.path.basename(self.FilePath)
+            self.FileNameGot.emit()
+
+    def GetFileName(self):
+        return self.FileName
+    
+    FbxFileName = Property(str, GetFileName, notify=FileNameGot)
+
+    def SetMetaData(self):
+        fileStats = os.stat(self.FilePath)
+
+        self.DateAuthored = time.ctime(fileStats.st_ctime)
+        self.LastAccessed = time.ctime(fileStats.st_atime)
+        self.LastModified = time.ctime(fileStats.st_mtime)
+        self.FileSize = fileStats.st_size / 1000000
+
+        self.MetaDataGot.emit()
+
+    def GetDateAuthored(self):
+        return self.DateAuthored
+    
+    FileDateAuthored = Property(str, GetDateAuthored, notify=MetaDataGot)
+
+    def GetLastAccessed(self):
+        return self.LastAccessed
+    
+    FileLastAccessed = Property(str, GetLastAccessed, notify=MetaDataGot)
+    
+    def GetLastModified(self):
+        return self.LastModified
+    
+    FileLastModified = Property(str, GetLastModified, notify=MetaDataGot)
+    
+    def GetFileSize(self):
+        return self.FileSize
+    
+    FbxFileSize = Property(int, GetFileSize, notify=MetaDataGot)
     
 
     def BackupFile(self):
@@ -157,7 +234,7 @@ class ToolMethods(QObject):
 
         #Import FBX file
         if not Importer.Initialize(self.FilePath, -1, None):
-            self.SetExportingFileProgress(f"\n>> Failed to initialize importer for {self.FilePath}")
+            self.SetImportingFileProgress(f"\n>> Failed to initialize importer for {self.FilePath}")
             Importer.Destroy #Manual garbage collection since the sdk is a C++ library wrapped in python there is risk 
             self.Manager.Destroy  #of memory not being fully managed by Pythons GC, ensures no memory leaks and other problems
             return
@@ -172,17 +249,16 @@ class ToolMethods(QObject):
 
         #The function that opens the explorer, the arguments limit the chosen file types to only be fbx
         self.FilePath = askopenfilename(filetypes=[("FBX Files", ".fbx")])
-        self.SetImportingFileProgress(f"\n>> user chose {self.FilePath}")
-        print(self.GetFileName(self.FilePath))
+        self.SetFileName()
 
         ToolMethods.BackupFile(self)
         self.ImportSceneFbx()
 
+        self.SetFileName()
+        self.SetMetaData()
 
-    def GetFileName(self, FilePath: str) -> str:
-        return os.path.basename(FilePath)
-    
-        
+        self.SetImportingFileProgress(f"\n>> user chose {self.FilePath}")
+
 
     #Cleanup functions
     #Debug function to show how many nodes have been found
@@ -194,7 +270,7 @@ class ToolMethods(QObject):
     #Temporary export function to test deletion methods
     @Slot()
     def ExportScene(self):
-        OutputPath = f"./Exports/{self.GetFileName(self.FilePath)}"
+        OutputPath = f"./Exports/{self.GetFileName()}"
 
         #If no scene
         if not self.Scene:
@@ -267,8 +343,8 @@ class ToolMethods(QObject):
                 
             cameraNode.Destroy()
 
-        self.SetDeleteCameraProgress("\n>> Cameras deleted.")
         self.Cameras.clear()
+        self.SetDeleteCameraProgress("\n>> Cameras deleted.")
 
     @Slot()
     def DeleteULMarkers(self):
@@ -285,8 +361,8 @@ class ToolMethods(QObject):
 
             marker.Destroy()
 
-        self.SetDeleteMarkerProgress("\n>> Un-labelled markers deleted.")
         self.ULMarkers.clear()
+        self.SetDeleteMarkerProgress("\n>> Un-labelled markers deleted.")
     
 
 
@@ -340,6 +416,11 @@ class ToolMethods(QObject):
         
         return bestRoot
     
+    def GetSkeletonHeirarchy(self):
+        return self.SkeletonToString(self.FindCharacterSkeleton())
+
+    OriginalSkeleton = Property(str, GetSkeletonHeirarchy, notify=ImportProgressChanged)
+    
     def CollectSkeletonBones(self, root: fbx.FbxNode) -> list[fbx.FbxNode]:
         bones = []
 
@@ -350,6 +431,20 @@ class ToolMethods(QObject):
 
         recurse(root)
         return bones
+    
+    def SkeletonToString(self, bone: fbx.FbxNode, indent=0):
+        lines = []
+
+        prefix = "    " * indent
+        if indent == 0:
+            lines.append(f"{bone.GetName()}")
+        else:
+            lines.append(f"{prefix}↳ {bone.GetName()}")
+
+        for i in range(bone.GetChildCount()):
+            lines.append(self.SkeletonToString(bone.GetChild(i), indent+1))
+
+        return "\n".join(lines)
 
     #Creates the root bone and reparents the skeleton to the root bone
     def CreateRootBone(self, pelvisNode: fbx.FbxNode) -> fbx.FbxNode:
@@ -579,6 +674,8 @@ class ToolMethods(QObject):
 
         Recurse(sourceBone)
         self.SetSkeletonRenameProgress("\n>> Skeleton rename complete!")
-    
+        self.SkeletonRenamed.emit()
+
+    ModifiedSkeleton = Property(str, GetSkeletonHeirarchy, notify=SkeletonRenamed)
 
             

@@ -1,120 +1,244 @@
 // EditPage.qml
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Item {
-    id: editTab
+    ColumnLayout {
+        anchors.fill: parent
 
-    Row {
-        anchors.centerIn: parent
+        //This column allows for the 'Layout.alignment' properties to work since the StackLayout class stretches the items to max so layout
+        //is not taken into account
+        ColumnLayout {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            spacing: 0
 
-        width: 400
-        height: 200
-        spacing: 20
-
-        Column {
-            width: 200
-            height: 200
-            spacing: 20
-
-            Button {
-                width: 200
-                height: 100
-                onClicked: {
-                    Tools.EnsureRootBone();
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Add Root Bone"
-                    color: "#000000"
-                    font: "24"
-                }
+            Label {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                text: "Edit Options:"
+                color: "#000000"
+                font.bold: true
+                font.underline: true
+                font.pixelSize: 48
             }
-
-            Button {
-                width: 200
-                height: 100
-                onClicked: {
-                    Tools.RenameSkeleton();
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "Rename Skeleton to UE Skeleton"
-                    wrapMode: Text.Wrap
-                    color: "#000000"
-                    font: "24"
-                }
-            }
-
-            Text {
-                width: 400
-                wrapMode: Text.Wrap
-                color: '#ff0000'
-                text: "Warning! This operation works for most of the skeleton but not all of it. Some bones will be misnamed. Manual checking is advised.\nAdding a root bone first is recommended."
-            }
-        }
-
-        Column {
-            width: 200
-            height: 200
-            spacing: 20
 
             Rectangle {
-                width: 200
-                height: 100
-                color: "#000000"
-                border.color: '#4d4d4d'
-                border.width: 3
-                radius: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.preferredWidth: 700
+                Layout.preferredHeight: 290
 
-                ScrollView {
+                RowLayout {
                     anchors.fill: parent
+                    spacing: 10
 
-                    //Disables scroll bar visual
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    ColumnLayout {
+                        spacing: 10
 
-                    Column {
-                        width: parent.width
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 275
+                            Layout.preferredHeight: 60
+                            onClicked: Tools.EnsureRootBone()
+
+                            Text {
+                                text: "Add Root Bone"
+                                font.pixelSize: 34
+                                color: "#000000"
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                            Layout.preferredWidth: 350
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.RootBoneUpdate
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+                        }
 
                         Text {
-                            width: parent.width
-                            padding: 10
-                            wrapMode: Text.Wrap
-                            text: Tools.RootBoneUpdate
-                            color: "#ffffff"
+                            color: '#ffffff'
+                            text: "Warning! This operation renames the skeleton to\nmatch the Unreal Engine default skeleton.\nIt has a ~85% accuracy, manual review is advised."
+                            font.pixelSize: 16
+                        }
+                    }
+
+                    ColumnLayout {
+                        spacing: 10
+
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 275
+                            Layout.preferredHeight: 60
+                            onClicked: Tools.RenameSkeleton()
+
+                            Text {
+                                text: "Rename Skeleton"
+                                font.pixelSize: 34
+                                color: "#000000"
+                                anchors.centerIn: parent
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 350
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.SkeletonUpdate
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            color: '#ff0000'
+                            text: "Warning! This operation renames the skeleton to\nmatch the Unreal Engine default skeleton.\nIt has a ~85% accuracy, manual review is advised."
+                            font.pixelSize: 16
                         }
                     }
                 }
             }
 
             Rectangle {
-                width: 200
-                height: 100
-                color: "#000000"
-                border.color: '#4d4d4d'
-                border.width: 3
-                radius: 10
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                Layout.preferredWidth: 700
+                Layout.preferredHeight: 250
 
-                ScrollView {
+                ColumnLayout {
                     anchors.fill: parent
 
-                    //Disables scroll bar visual
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    Text {
+                        Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                        text: "Skeleton Info:"
+                        font.pixelSize: 34
+                        color: "#000000"
+                    }
 
-                    Column {
-                        width: parent.width
-
+                    ColumnLayout {
                         Text {
-                            width: parent.width
-                            padding: 10
-                            wrapMode: Text.Wrap
-                            text: Tools.SkeletonUpdate
-                            color: "#ffffff"
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                            text: "Original:"
+                            font.pixelSize: 22
+                            color: "#000000"
+                        }
+
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 700
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.OriginalSkeleton
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Text {
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                            text: "Modified:"
+                            font.pixelSize: 22
+                            color: "#000000"
+                        }
+
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                            Layout.preferredWidth: 700
+                            Layout.preferredHeight: 150
+                            color: "#000000"
+                            border.color: '#4d4d4d'
+                            border.width: 3
+                            radius: 10
+
+                            ScrollView {
+                                anchors.fill: parent
+
+                                //Disables scroll bar visual
+                                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+
+                                Column {
+                                    width: parent.width
+
+                                    Text {
+                                        font.pixelSize: 18
+                                        width: parent.width
+                                        padding: 10
+                                        wrapMode: Text.Wrap
+                                        text: Tools.ModifiedSkeleton
+                                        color: "#ffffff"
+                                    }
+                                }
+                            }
                         }
                     }
                 }

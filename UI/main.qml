@@ -5,37 +5,42 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 ApplicationWindow {
-    
+
     visible: true
-    width: 600
-    height: 500
-    title: "Mocap File Cleaner"
-    color: "#ffffff"
+    minimumWidth: 800
+    maximumWidth: 800
+    minimumHeight: 900
+    maximumHeight: 900
+    title: "Mocap File Cleaner by Riley Proctor"
+    color: '#ffffff'
 
-    TabBar {
-        id: bar 
-        width: parent.width
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 25
 
-        TabButton {
-            text: qsTr("Import")
+        TabBar {
+            id: tabBar
+            Layout.fillWidth: true
+
+            TabButton {
+                text: "Import"
+            }
+            TabButton {
+                text: "Cleanup"
+            }
+            TabButton {
+                text: "Edit"
+            }
         }
-        TabButton  {
-            text: qsTr("Clean-up")
+
+        StackLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            currentIndex: tabBar.currentIndex
+
+            ImportPage {}
+            CleanupPage {}
+            EditPage {}
         }
-        TabButton {
-            text: qsTr("Edit")
-        }
-    }
-
-    //The layouts for the different tabs
-    StackLayout {
-        width: parent.width
-        currentIndex: bar.currentIndex
-        anchors.centerIn: parent
-
-
-        ImportPage{}
-        CleanupPage{}
-        EditPage{}
     }
 }
